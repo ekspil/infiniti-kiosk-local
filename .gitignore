@@ -1,0 +1,5 @@
+/node_modules/
+/.idea/modules.xml
+/.idea/vcs.xml
+/.idea/kiosk-local.iml
+/.idea/.gitignore

@@ -1,5 +1,8 @@
 // Require the framework and instantiate it
+
+require("dotenv").config()
 const fastify = require('fastify')({ logger: true })
+const fetch = require('node-fetch')
 
 
 const Kassa = require("./services/KassaService")
@@ -8,34 +11,60 @@ const kassa = new Kassa()
 
 // Declare a route
 
+fastify.register(require('fastify-cors'), {
+    credentials: true,
+    origin: true
+})
+
+
+
 
 
 fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
+    let ok = false
+    try{
+        const res = await kassa.payTerminal(request.body)
+        const pay = await res.json()
+        //const pay = {Status: 0}
+        const data = {
+            bill: request.body,
+            pay,
+        }
+        if(!pay.Error && pay.Status === 0){
 
-    const res = await kassa.payTerminal(request.body)
-    const result = await res.json()
-    return {ok: true, result}
-})
+            const res = await fetch(`https://api.rb24.ru/api/kiosk/create`, {
+                method: 'post',
+                body: JSON.stringify(data) ,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            const result = await res.json()
+            if(!result.order) throw new Error("LOCAL_SERVER_REPORT_ERROR Неверный ответ от сервера")
+            ok = true
+            return {ok, order: result.order}
 
-fastify.post('/api/kassa/xReport/', async (request, reply) => {
+        }
+        return {ok, result: pay}
 
-    const res = await kassa.xReport(request.body)
-    return {ok: true, res}
-
-})
-
-fastify.post('/api/kassa/zReport/', async (request, reply) => {
-
-    const res = await kassa.zReport(request.body)
-    await kassa.Settlement(request.body)
-    return {ok: true, res}
-
-})
+    }
+    catch (e) {
+        return {ok: false, result: e.message}
+    }})
 
 
 fastify.post('/api/kassa/returnChekPayment/', async (request, reply) => {
 
     const res = await kassa.returnChekPayment(request.body)
+    const result = await res.json()
+    return {ok: true, result}
+
+})
+
+
+fastify.post('/api/kassa/settlement/', async (request, reply) => {
+
+    const res = await kassa.Settlement(request.body)
     const result = await res.json()
     return {ok: true, result}
 

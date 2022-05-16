@@ -1,9 +1,13 @@
 const fetch = require("node-fetch")
 
 class Order {
-    constructor() {
+    constructor(eoServer) {
+        this.eoServer = eoServer || "localhost:4001"
         this.guid = this.guid.bind(this)
         this.ExecuteCommand = this.ExecuteCommand.bind(this)
+        this.eoDTO = function(data){
+
+        }
     }
 
     async ExecuteCommand(Data, otherServer){
@@ -16,6 +20,45 @@ class Order {
                 'Content-Type': 'application/json',
                 "Authorization": "Basic " + Buffer.from(process.env.KKM_USER + ":" + process.env.KKM_PASSWORD).toString('base64')  },
         })
+    }
+
+    async sendToEO(data, order){
+
+        const sendData = {
+            type: data.type,
+            status: "PAYED",
+            text: data.text || "",
+            price: data.price,
+            id: order.id,
+            items: []
+        }
+
+        for(let item of data.items){
+            if(item.setProducts && item.setProducts.length > 0){
+                for(let s of item.setProducts){
+                    s.code = s.id
+                    sendData.items.push(s)
+                }
+            }
+            else{
+                item.code = item.id
+                sendData.items.push(item)
+            }
+        }
+        try{
+            return await fetch(`http://${this.eoServer}/fullCheck`, {
+                method: 'post',
+                body: JSON.stringify(sendData) ,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+        }
+        catch (e) {
+            return {error: e, result: "Ошибка при отправке заказа на электронную очередь. Сфотайте заказ и покажите менеджеру для получения."}
+        }
+
+
     }
 
 

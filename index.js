@@ -1,5 +1,6 @@
 // Require the framework and instantiate it
-
+let eoServer = process.argv[2];
+console.log(eoServer)
 require("dotenv").config()
 const fastify = require('fastify')({ logger: true })
 const fetch = require('node-fetch')
@@ -7,7 +8,7 @@ const fetch = require('node-fetch')
 
 const Kassa = require("./services/KassaService")
 
-const kassa = new Kassa()
+const kassa = new Kassa(eoServer)
 
 // Declare a route
 
@@ -23,9 +24,9 @@ fastify.register(require('fastify-cors'), {
 fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
     let ok = false
     try{
-        const res = await kassa.payTerminal(request.body)
-        const pay = await res.json()
-        //const pay = {Status: 0}
+        //const res = await kassa.payTerminal(request.body)
+        //const pay = await res.json()
+        const pay = {Status: 0}
         const data = {
             bill: request.body,
             pay,
@@ -42,6 +43,9 @@ fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
             const result = await res.json()
             if(!result.order) throw new Error("LOCAL_SERVER_REPORT_ERROR Неверный ответ от сервера")
             ok = true
+
+            const sendToEO = await kassa.sendToEO(request.body, result.order)
+
             return {ok, order: result.order}
 
         }

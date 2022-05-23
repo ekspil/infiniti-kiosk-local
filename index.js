@@ -4,7 +4,7 @@ console.log(eoServer)
 require("dotenv").config()
 const fastify = require('fastify')({ logger: true })
 const fetch = require('node-fetch')
-
+console.log(process.env.KKM_SERVER)
 
 const Kassa = require("./services/KassaService")
 
@@ -24,9 +24,9 @@ fastify.register(require('fastify-cors'), {
 fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
     let ok = false
     try{
-        //const res = await kassa.payTerminal(request.body)
-        //const pay = await res.json()
-        const pay = {Status: 0}
+        const res = await kassa.payTerminal(request.body)
+        const pay = await res.json()
+        //const pay = {Status: 0}
         const data = {
             bill: request.body,
             pay,

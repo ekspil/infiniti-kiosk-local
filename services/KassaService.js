@@ -11,7 +11,7 @@ class Order {
     }
 
     async ExecuteCommand(Data, otherServer){
-        let server = process.env.KKM_SERVER
+        let server = process.env.KKM_SERVER || "localhost:5893"
         if(otherServer) server = otherServer
         return await fetch(`http://${server}/Execute`, {
             method: 'post',
@@ -36,23 +36,31 @@ class Order {
         for(let item of data.items){
             if(item.setProducts && item.setProducts.length > 0){
                 for(let s of item.setProducts){
-                    s.code = s.id
-                    sendData.items.push(s)
+                    for(let i = 0; i < s.count; i++){
+                        s.code = i
+                        sendData.items.push(s)
+                    }
+
                 }
             }
             else{
-                item.code = item.id
-                sendData.items.push(item)
+                for(let i = 0; i < item.count; i++) {
+                    item.code = item.i
+                    sendData.items.push(item)
+                }
             }
         }
         try{
-            return await fetch(`http://${this.eoServer}/fullCheck`, {
-                method: 'post',
-                body: JSON.stringify(sendData) ,
-                headers: {
-                    'Content-Type': 'application/json',
-                }
+            for( let item of sendData.items){
+                await fetch(`http://${this.eoServer}/new/?name=${item.name}&unit=${sendData.id}&id=${sendData.id}-${item.id}-${item.code}&station=${item.station}`, {
+                    method: 'get'
+                })
+            }
+            await fetch(`http://${this.eoServer}/newCheck/?id=${sendData.id}&checkType=${sendData.type === "IN" ? "1" : "2"}&code=&guestName=`, {
+                method: 'get'
             })
+
+
         }
         catch (e) {
             return {error: e, result: "Ошибка при отправке заказа на электронную очередь. Сфотайте заказ и покажите менеджеру для получения."}

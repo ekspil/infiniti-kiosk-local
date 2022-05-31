@@ -85,23 +85,23 @@ class Order {
             if(item.setProducts && item.setProducts.length > 0){
                 for(let s of item.setProducts){
                     for(let i = 0; i < s.count; i++){
-                        s.code = i
-                        sendData.items.push(s)
+                        s.uid = i
+                        sendData.items.push(JSON.parse(JSON.stringify(s)))
                     }
 
                 }
             }
             else{
                 for(let i = 0; i < item.count; i++) {
-                    item.code = item.i
-                    sendData.items.push(item)
+                    item.uid = i
+                    sendData.items.push(JSON.parse(JSON.stringify(item)))
                 }
             }
         }
 
         try{
             for( let item of sendData.items){
-                await fetch(`http://${this.eoServer}/del/?name=${item.name}&unit=${sendData.id}&id=${sendData.id}-${item.id}-${item.code}&station=${item.station}`, {
+                await fetch(`http://${this.eoServer}/del/?name=${item.name}&unit=${sendData.id}&id=${sendData.id}-${item.id}-${item.uid}&station=${item.station}`, {
                     method: 'get'
                 })
             }

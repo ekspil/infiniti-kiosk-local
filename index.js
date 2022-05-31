@@ -58,10 +58,34 @@ fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
 
 
 fastify.post('/api/kassa/returnChekPayment/', async (request, reply) => {
-
+    let ok = false
     const res = await kassa.returnChekPayment(request.body)
-    const result = await res.json()
-    return {ok: true, result}
+    const pay = await res.json()
+    //const pay = {Status: 0}
+    const data = {
+        bill: request.body,
+        pay,
+    }
+    if(!pay.Error && pay.Status === 0){
+
+        const res = await fetch(`https://api.rb24.ru/api/kiosk/cancel`, {
+            method: 'post',
+            body: JSON.stringify(data) ,
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        const result = await res.json()
+        if(!result.order) throw new Error("LOCAL_SERVER_REPORT_ERROR Неверный ответ от сервера")
+        ok = true
+
+        const sendToEO = await kassa.cancelToEO(request.body, result.order)
+
+        return {ok, order: result.order}
+
+    }
+    return {ok, result: pay}
+
 
 })
 

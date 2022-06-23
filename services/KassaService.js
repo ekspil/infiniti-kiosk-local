@@ -36,7 +36,7 @@ class Order {
         for(let item of data.items){
             if(item.setProducts && item.setProducts.length > 0){
                 for(let s of item.setProducts){
-                    for(let i = 0; i < s.count; i++){
+                    for(let i = 0; i < item.count; i++){
                         s.uid = i
                         sendData.items.push(JSON.parse(JSON.stringify(s)))
                     }

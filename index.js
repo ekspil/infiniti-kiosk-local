@@ -26,7 +26,7 @@ fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
     try{
         const res = await kassa.payTerminal(request.body)
         const pay = await res.json()
-        //const pay = {Status: 0}
+        // const pay = {Status: 0}
         const data = {
             bill: request.body,
             pay,
@@ -42,6 +42,16 @@ fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
             })
             const result = await res.json()
             if(!result.order) throw new Error("LOCAL_SERVER_REPORT_ERROR Неверный ответ от сервера")
+
+
+            //
+            // const result = {
+            //     order: {
+            //         id: 1
+            //     }
+            // }
+            //
+
             ok = true
 
             const sendToEO = await kassa.sendToEO(request.body, result.order)

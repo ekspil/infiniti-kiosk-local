@@ -24,97 +24,89 @@ class Order {
 
     async sendToEO(data, order){
 
-        const sendData = {
-            type: data.type,
-            status: "PAYED",
-            text: data.text || "",
-            price: data.price,
+        const body = {
             id: order.id,
-            items: []
+            die: 0,
+            alarm: 0,
+            action: "PAYED",
+            payed: 1,
+            ready: 0,
+            takeOut: 0,
+            type: data.type,
+            source: "KIOSK",
+            flag: "",
+            amount: "",
+            guestName: "",
+            extId: "",
+            text: "",
+            pin: "",
+            positions: []
         }
 
-        for(let item of data.items){
-            if(item.setProducts && item.setProducts.length > 0){
-                for(let s of item.setProducts){
-                    for(let i = 0; i < item.count; i++){
-                        s.uid = i
-                        sendData.items.push(JSON.parse(JSON.stringify(s)))
-                    }
 
-                }
+        for (let item  of data.items) {
+
+            const poss = {
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                count: item.count || 1,
+                code: item.codeOneC,
+                station: item.station,
+                corner: item.corner,
+                mods: []
+
             }
-            else{
-                for(let i = 0; i < item.count; i++) {
-                    item.uid = i
-                    sendData.items.push(JSON.parse(JSON.stringify(item)))
-                }
-            }
+            body.positions.push(poss)
+
         }
-        try{
-            for( let item of sendData.items){
-                await fetch(`http://${this.eoServer}/new/?name=${item.name}&unit=${sendData.id}&id=${sendData.id}-${item.id}-${item.uid}&station=${item.station}`, {
-                    method: 'get'
-                })
-            }
-            await fetch(`http://${this.eoServer}/newCheck/?id=${sendData.id}&checkType=${sendData.type === "IN" ? "1" : "2"}&code=&guestName=`, {
-                method: 'get'
+
+        try {
+            const result = await fetch('http://'+this.eoServer+'/api/terminal/order/change', {
+                method: "POST",
+                body: JSON.stringify(body)
             })
-
-
+            return await result.json()
+        } catch (e) {
+            return  {error: e, result: "Ошибка при отправке заказа на электронную очередь. Сфотайте заказ и покажите менеджеру для получения."}
         }
-        catch (e) {
-            return {error: e, result: "Ошибка при отправке заказа на электронную очередь. Сфотайте заказ и покажите менеджеру для получения."}
-        }
-
 
     }
 
 
+
     async cancelToEO(data, order){
 
-        const sendData = {
-            type: data.type,
-            status: "PAYED",
-            text: data.text || "",
-            price: data.price,
+        const body = {
             id: order.id,
-            items: []
+            die: 0,
+            alarm: 0,
+            action: "DELETE",
+            payed: 1,
+            ready: 0,
+            takeOut: 0,
+            type: data.type,
+            source: "KIOSK",
+            flag: "",
+            amount: "",
+            guestName: "",
+            extId: "",
+            text: "",
+            pin: "",
+            positions: []
         }
 
-        for(let item of data.items){
-            if(item.setProducts && item.setProducts.length > 0){
-                for(let s of item.setProducts){
-                    for(let i = 0; i < s.count; i++){
-                        s.uid = i
-                        sendData.items.push(JSON.parse(JSON.stringify(s)))
-                    }
 
-                }
-            }
-            else{
-                for(let i = 0; i < item.count; i++) {
-                    item.uid = i
-                    sendData.items.push(JSON.parse(JSON.stringify(item)))
-                }
-            }
-        }
 
-        try{
-            for( let item of sendData.items){
-                await fetch(`http://${this.eoServer}/del/?name=${item.name}&unit=${sendData.id}&id=${sendData.id}-${item.id}-${item.uid}&station=${item.station}`, {
-                    method: 'get'
-                })
-            }
-            await fetch(`http://${this.eoServer}/delCheck/?id=${sendData.id}&checkType=${sendData.type === "IN" ? "1" : "2"}&code=&guestName=`, {
-                method: 'get'
+        try {
+            const result = await fetch('http://'+this.eoServer+'/api/terminal/order/change', {
+                method: "POST",
+                body: JSON.stringify(body)
             })
-
-
+            return await result.json()
+        } catch (e) {
+            return  {error: e, result: "Ошибка при отправке заказа на электронную очередь. Сфотайте заказ и покажите менеджеру для получения."}
         }
-        catch (e) {
-            return {error: e, result: "Ошибка при отправке заказа на электронную очередь. Сфотайте заказ и покажите менеджеру для получения."}
-        }
-
 
     }
 

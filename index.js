@@ -33,7 +33,14 @@ fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
         }
         if(!pay.Error && pay.Status === 0){
 
-            const res = await fetch(`https://api.rb24.ru/api/kiosk/create`, {
+            // const res = await fetch(`https://api.rb24.ru/api/kiosk/create`, {
+            //     method: 'post',
+            //     body: JSON.stringify(data) ,
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     }
+            // })
+            const res = await fetch(`http://localhost/api/kiosk/create`, {
                 method: 'post',
                 body: JSON.stringify(data) ,
                 headers: {
@@ -54,6 +61,10 @@ fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
 
             ok = true
 
+
+            if(result.order.iiko){
+                return {ok, order: result.order}
+            }
             const sendToEO = await kassa.sendToEO(request.body, result.order)
 
             return {ok, order: result.order}

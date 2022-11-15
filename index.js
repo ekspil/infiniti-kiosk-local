@@ -33,20 +33,20 @@ fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
         }
         if(!pay.Error && pay.Status === 0){
 
-            // const res = await fetch(`https://api.rb24.ru/api/kiosk/create`, {
-            //     method: 'post',
-            //     body: JSON.stringify(data) ,
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     }
-            // })
-            const res = await fetch(`http://localhost/api/kiosk/create`, {
+            const res = await fetch(`https://api.rb24.ru/api/kiosk/create`, {
                 method: 'post',
                 body: JSON.stringify(data) ,
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
+            // const res = await fetch(`http://localhost/api/kiosk/create`, {
+            //     method: 'post',
+            //     body: JSON.stringify(data) ,
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     }
+            // })
             const result = await res.json()
             if(!result.order) throw new Error("LOCAL_SERVER_REPORT_ERROR Неверный ответ от сервера")
 

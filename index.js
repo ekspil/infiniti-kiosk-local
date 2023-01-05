@@ -48,6 +48,17 @@ fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
             //     }
             // })
             const result = await res.json()
+
+            if(!result || result.moneyBack){
+
+                const res = await kassa.cancelChekPayment(pay)
+
+                return {ok: false, result: {message: result.message}, error: true}
+
+            }
+
+
+
             if(!result.order) throw new Error("LOCAL_SERVER_REPORT_ERROR Неверный ответ от сервера")
 
 

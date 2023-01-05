@@ -166,6 +166,28 @@ class Order {
         return await this.ExecuteCommand(Data);
 
     }
+// Cancel безнала
+    async cancelChekPayment(data) {
+
+
+        let Data = {
+            Command: "CancelPaymentByPaymentCard",
+            NumDevice: 0,
+            CardNumber: "",
+
+            Amount: data.Amount,
+
+            ReceiptNumber: data.ReceiptNumber,
+            RRNCode: data.RRNCode,
+            AuthorizationCode: data.AuthorizationCode,
+            IdCommand: this.guid()
+
+        };
+
+
+        return await this.ExecuteCommand(Data);
+
+    }
 
     //Сверка итогов
 

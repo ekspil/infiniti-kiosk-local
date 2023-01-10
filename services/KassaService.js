@@ -171,7 +171,7 @@ class Order {
 
 
         let Data = {
-            Command: "CancelPaymentByPaymentCard",
+            Command: "EmergencyReversal",
             NumDevice: 0,
             CardNumber: "",
 

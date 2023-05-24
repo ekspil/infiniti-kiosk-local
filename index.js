@@ -24,64 +24,75 @@ fastify.register(require('fastify-cors'), {
 fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
     let ok = false
     try{
-        const res = await kassa.payTerminal(request.body)
-        const pay = await res.json()
-        // const pay = {Status: 0}
-        const data = {
-            bill: request.body,
-            pay,
-        }
-        if(!pay.Error && pay.Status === 0){
 
-            const res = await fetch(`https://api.rb24.ru/api/kiosk/create`, {
+
+
+
+        const data = {
+            bill: request.body
+        }
+
+        let result
+        try{
+
+            const res = await fetch(`https://terminal-api.rb24.ru/api/kiosk/create`, {
                 method: 'post',
                 body: JSON.stringify(data) ,
                 headers: {
                     'Content-Type': 'application/json'
                 }
             })
-            // const res = await fetch(`http://localhost/api/kiosk/create`, {
-            //     method: 'post',
-            //     body: JSON.stringify(data) ,
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     }
-            // })
-            const result = await res.json()
-
-            if(!result || result.moneyBack){
-
-                const res = await kassa.cancelChekPayment(pay)
-
-                return {ok: false, result: {message: result.message}, error: true}
-
-            }
-
-
-
-            if(!result.order) throw new Error("LOCAL_SERVER_REPORT_ERROR Неверный ответ от сервера")
-
-
-            //
-            // const result = {
-            //     order: {
-            //         id: 1
-            //     }
-            // }
-            //
-
-            ok = true
-
-
-            if(result.order.iiko){
-                return {ok, order: result.order}
-            }
-            const sendToEO = await kassa.sendToEO(request.body, result.order)
-
-            return {ok, order: result.order}
+            result = await res.json()
 
         }
-        return {ok, result: pay}
+        catch{
+            console.log("SERVICE_FETCH_ERROR")
+        }
+
+        if(!result.ok) {
+            return {ok: false, result: result.message}
+        }
+
+
+
+        const res = await kassa.payTerminal(request.body)
+        const pay = await res.json()
+
+        if(pay.Error || pay.Status !== 0) return {ok: false, result: "Операция оплаты отклонена"}
+
+
+        let resultClose
+        const dataClose = {
+            bill: request.body,
+            pay,
+            orderId: result.order.id,
+            orderIikoId: result.order.iikoId,
+            userId: result.order.userId
+        }
+        try{
+
+            const res = await fetch(`https://terminal-api.rb24.ru/api/kiosk/close`, {
+                method: 'post',
+                body: JSON.stringify(dataClose) ,
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            resultClose = await res.json()
+
+        }
+        catch{
+            console.log("SERVICE_FETCH_ERROR")
+        }
+        if(!resultClose.order) throw new Error("LOCAL_SERVER_REPORT_ERROR Неверный ответ от сервера")
+        ok = true
+
+
+
+
+
+
+        return {ok, result: pay, order: resultClose.order.order}
 
     }
     catch (e) {
@@ -100,7 +111,7 @@ fastify.post('/api/kassa/returnChekPayment/', async (request, reply) => {
     }
     if(!pay.Error && pay.Status === 0){
 
-        const res = await fetch(`https://api.rb24.ru/api/kiosk/cancel`, {
+        const res = await fetch(`https://terminal-api.rb24.ru/api/kiosk/cancel`, {
             method: 'post',
             body: JSON.stringify(data) ,
             headers: {

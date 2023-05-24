@@ -140,6 +140,27 @@ class Order {
         // Вызов команды
         return await this.ExecuteCommand(Data);
     }
+
+    // Блокировка суммы
+    async AuthorisationByPaymentCard(data) {
+        let NumDevice = 0
+        let sum = data.items.reduce((sum, current) => {
+                return sum + current.count * current.price
+            }, 0);
+
+        // Подготовка данных команды
+        let Data = {
+            Command: "PayByPaymentCard",
+            NumDevice: NumDevice,
+            CardNumber: "",
+            Amount: sum,
+            ReceiptNumber: data.id,
+            IdCommand: this.guid(),
+        }
+
+        // Вызов команды
+        return await this.ExecuteCommand(Data);
+    }
 // Возврат безнала
     async returnChekPayment(data) {
 
@@ -171,15 +192,60 @@ class Order {
 
 
         let Data = {
-            Command: "EmergencyReversal",
+            Command: "CancelPaymentByPaymentCard",
             NumDevice: 0,
             CardNumber: "",
 
             Amount: data.Amount,
-
+            UniversalID: data.UniversalID,
             ReceiptNumber: data.ReceiptNumber,
             RRNCode: data.RRNCode,
             AuthorizationCode: data.AuthorizationCode,
+            IdCommand: this.guid()
+
+        };
+
+
+        return await this.ExecuteCommand(Data);
+
+    }
+
+// Подтверждение списания
+    async AuthConfirmationByPaymentCard(data) {
+
+
+        let Data = {
+            Command: "AuthConfirmationByPaymentCard",
+            NumDevice: 0,
+            CardNumber: "",
+
+            Amount: data.Amount,
+            UniversalID: data.UniversalID,
+            // ReceiptNumber: data.ReceiptNumber,
+            // RRNCode: data.RRNCode,
+            // AuthorizationCode: data.AuthorizationCode,
+            IdCommand: this.guid()
+
+        };
+
+
+        return await this.ExecuteCommand(Data);
+
+    }
+// Отмена списания
+    async CancelAuthorisationByPaymentCard(data) {
+
+
+        let Data = {
+            Command: "CancelAuthorisationByPaymentCard",
+            NumDevice: 0,
+            CardNumber: "",
+
+            Amount: data.Amount,
+            UniversalID: data.UniversalID,
+            // ReceiptNumber: data.ReceiptNumber,
+            // RRNCode: data.RRNCode,
+            // AuthorizationCode: data.AuthorizationCode,
             IdCommand: this.guid()
 
         };

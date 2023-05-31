@@ -35,7 +35,7 @@ fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
         let result
         try{
 
-            const res = await fetch(`https://terminal-api.rb24.ru/api/kiosk/create`, {
+            const res = await fetch(`https://api.rb24.ru/api/kiosk/create`, {
                 method: 'post',
                 body: JSON.stringify(data) ,
                 headers: {
@@ -71,7 +71,7 @@ fastify.post('/api/kassa/payTerminal/', async (request, reply) => {
         }
         try{
 
-            const res = await fetch(`https://terminal-api.rb24.ru/api/kiosk/close`, {
+            const res = await fetch(`https://api.rb24.ru/api/kiosk/close`, {
                 method: 'post',
                 body: JSON.stringify(dataClose) ,
                 headers: {
@@ -111,7 +111,7 @@ fastify.post('/api/kassa/returnChekPayment/', async (request, reply) => {
     }
     if(!pay.Error && pay.Status === 0){
 
-        const res = await fetch(`https://terminal-api.rb24.ru/api/kiosk/cancel`, {
+        const res = await fetch(`https://api.rb24.ru/api/kiosk/cancel`, {
             method: 'post',
             body: JSON.stringify(data) ,
             headers: {
